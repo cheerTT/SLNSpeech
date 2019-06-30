@@ -138,7 +138,7 @@ with tf.Graph().as_default():
 
     def _predict(image_path):
 
-        images, count_per_image = _load_and_align_data(image_path, 160, 44, 0.25)
+        images, count_per_image = _load_and_align_data(image_path, 160, 44, )
         if len(count_per_image) == 0:
             return None
         # Run forward pass to calculate embeddings
