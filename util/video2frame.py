@@ -27,6 +27,36 @@ def get_image(video_path, image_path):
         print('while handling image, something seems to have an error!')
 
 
+def get_audio(video_path, audio_path):
+    """
+    获取视频中的声音，声音波形为11025，单声道，wav格式
+    :param video_path: 原始视频路径
+    :param image_path: 处理后图像的存放路径
+    :return:
+    """
+    try:
+        os.system('ffmpeg -i {0} -ac 1 -ar 11025 {1}.wav'.format(video_path, audio_path))
+    except:
+        print('=======================================================')
+        print(video_path)
+        print('while handling audio, something seems to have an error!')
+
+
+def get_first_image(video_path, image_name):
+    """
+    获取单张图片
+    :param video_path: 原始视频路径
+    :param image_path: 处理后图像的存放路径
+    :return:
+    """
+    try:
+        os.system('ffmpeg -ss 00:00:02 -t 1 -i {0} -r 1 {1}'.format(video_path, image_name))
+    except:
+        print('=======================================================')
+        print(video_path)
+        print('while handling image, something seems to have an error!')
+
+
 if __name__ == '__main__':
     with open(jsonname, 'r') as load_f:
         load_dict = json.load(load_f)

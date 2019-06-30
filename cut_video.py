@@ -8,8 +8,8 @@ import collections
 import generate_color as gc
 import platform
 from PIL import Image
-from util.video2frame import get_image
-from util.face_detect import is_face, who_host
+from util.video2frame import get_image, get_first_image, get_audio
+from util.face_detect_facenet import is_face, who_host
 
 
 """
@@ -25,16 +25,17 @@ startTimes = []
 stopTimes = []
 durations = []
 
-print('=================')
-print(os.getcwd())
-
-
+# 存储切割视频片段
 middle_file_path = os.path.join(os.getcwd(), "middle_file")
-cut_file_path = os.path.join(os.getcwd(), "cut")
+# 存放切割视频帧
 save_frames_path = os.path.join(os.getcwd(), "host_video", "frames")
+# 存放切割音频
 save_audio_path = os.path.join(os.getcwd(), "host_video", "audio")
+# 存放截取视频开头图片的预处理文件
 tmp_first_frame_path = os.path.join(os.getcwd(), "tmp_middle")
 
+# 未用到的全局变量
+cut_file_path = os.path.join(os.getcwd(), "cut")
 ffmpegName = ""
 if platform.system() == "Windows":
     ffmpegName = "ffmpeg.exe"
@@ -104,22 +105,22 @@ def write_log(startFrame, stopFrame, rate, filepath, filename, cut_filename):
     durations.append(durationTime)
 
 
-def write_log_to_excel(name):
-    """
-    将剪裁的结果写入到cut对应文件夹中的excel文件
-    """
-    a = collections.OrderedDict()  # 使用顺序字典构建数据框，保证输出到excel时候数据顺序一致
-    a['文件名'] = cut_filenames
-    a['开始帧'] = startFrames
-    a['结束帧'] = stopFrames
-    a['开始时间'] = startTimes
-    a['结束时间'] = stopTimes
-    a['持续时间'] = durations
-    df = pd.DataFrame(a, index=range(0, len(cut_filenames)))
-    df.to_excel(os.path.join(cut_file_path, name, name + ".xlsx"), sheet_name='剪裁信息')
+# def write_log_to_excel(name):
+#     """
+#     将剪裁的结果写入到cut对应文件夹中的excel文件
+#     """
+#     a = collections.OrderedDict()  # 使用顺序字典构建数据框，保证输出到excel时候数据顺序一致
+#     a['文件名'] = cut_filenames
+#     a['开始帧'] = startFrames
+#     a['结束帧'] = stopFrames
+#     a['开始时间'] = startTimes
+#     a['结束时间'] = stopTimes
+#     a['持续时间'] = durations
+#     df = pd.DataFrame(a, index=range(0, len(cut_filenames)))
+#     df.to_excel(os.path.join(cut_file_path, name, name + ".xlsx"), sheet_name='剪裁信息')
 
 
-def save_video(frames, frameToStart, frameToStop, rate, saveNums, filename, size, who):
+def save_video(frames, frameToStart, frameToStop, rate, saveNums, filename, size):
     """
     使用opencv的VideoWrite来保存视频,并使用ffmpeg合并音频视频，只可保存为avi格式
     需下载OpenH264(openh264-1.6.0-win64)并配置环境变量
@@ -146,13 +147,38 @@ def save_video(frames, frameToStart, frameToStop, rate, saveNums, filename, size
     if not os.path.exists(filepath):
         os.mkdir(filepath)
     filename = filename_no_count + '_' + str(saveNums) + '.avi'  # 路径指定为cut文件夹下原视频文件名+剪裁序列序号
-    print(filename)
     writer.open(os.path.join(filepath, filename), int(1145656920), rate, size, True)  # 参数2为avi格式的forucc，使用别的格式会导致转换出错
+    print(filename, '片段帧大小', str(len(frames)))
+    if len(frames) < 140:
+        print('★★★★★★' + 'frames.size过小' + '★★★★★★')
+        return False
     for frame in frames:
         writer.write(frame)
 
-    print('==============================')
-    print(os.path.join(filepath, filename))
+    # 加入是否是主持人的判断逻辑
+    # 视频第三秒的视频片段图片，用于判断该视频是否保存用，后面需要对其进行切割
+    tmp_filename = filename.split('》')[-1].split('.')[0] + '_' + str(saveNums) + '.jpg'
+    tmp_path = os.path.join(tmp_first_frame_path, tmp_filename)
+    get_first_image(os.path.join(filepath, filename), tmp_path)
+
+    # 若识别不到人脸直接pass
+    res = is_face(tmp_path)
+    if res is None:
+        print('★★★★★★' + '未识别到人脸' + '★★★★★★')
+        return False
+
+    for i_path in res:
+        # 识别到人脸，看人脸是谁的
+        who = who_host(i_path)
+
+        # 不符合人脸的情况
+        if who is not None:
+            break
+
+    if who is None:
+        print('★★★★★★' + '人脸库中不存在该脸' + '★★★★★★')
+        return False
+
 
     # 调用自己的接口，把数据保存指定路径
     framesPath = os.path.join(save_frames_path, who, filename.split('》')[-1].split('.')[0])
@@ -172,7 +198,12 @@ def save_video(frames, frameToStart, frameToStop, rate, saveNums, filename, size
     if not os.path.exists(savePath):
         os.mkdir(savePath)
 
-    print('保存')
+    audioPath = os.path.join(save_audio_path, who)
+    if not os.path.exists(framesPath):
+        os.makedirs(framesPath)
+    get_audio(os.path.join(filepath, filename) + ".mp3", os.path.join(audioPath, filename.split('》')[-1].split('.')[0]))
+
+    print('该片段符合要求，已保存')
     # 使用ffmpeg合并音频与视频，保存在cut文件夹中
     # subprocess.call([os.path.join(os.getcwd(), ffmpegName), "-y", "-i", os.path.join(filepath, filename), "-i",
     #                  os.path.join(filepath, filename) + ".mp3", "-vcodec", "copy", "-acodec", "copy",
@@ -390,7 +421,8 @@ def cut_video(filename, mode=3, boundary=19):
             currentFrame += 1
             if not isSimilar:
                 if (currentFrame - frameToStart > int(rate)):
-                    print('发现剪辑')
+                    print('--------------------------我是分割线---------------------------')
+                    print('开始判断该片段是否符合剪辑要求')
                     if mode == 3:
                         #################################################
                         # 在保存视频之前需要设定是否保存
@@ -412,27 +444,13 @@ def cut_video(filename, mode=3, boundary=19):
                         #     tmp_frame.save(os.path.join(savePath, '%06d' % (index + 1) + '.jpg'))
 
                         # 保存图片
-                        img = Image.fromarray(currentImg, 'RGB')
-                        tmp_filename = filename.split('》')[-1].split('.')[0] + '_' + str(saveNums) + '.jpg'
-                        tmp_path = os.path.join(tmp_first_frame_path, tmp_filename)
-                        img.save(tmp_path)
-
-
-
-
-                        # 若识别不到人脸直接pass
-                        if is_face(tmp_path) is False:
-                            continue
-
-                        # 识别到人脸，看人脸是谁的
-                        who = who_host(tmp_path)
-
-                        # 不符合人脸的情况
-                        if who is None:
-                            continue
+                        # img = Image.fromarray(currentImg, 'RGB')
+                        # tmp_filename = filename.split('》')[-1].split('.')[0] + '_' + str(saveNums) + '.jpg'
+                        # tmp_path = os.path.join(tmp_first_frame_path, tmp_filename)
+                        # img.save(tmp_path)
 
                         # 保存当前图片，获取路径进行相关判断
-                        saveFlag = save_video(frames, frameToStart, currentFrame, rate, saveNums, filename, size, who)
+                        saveFlag = save_video(frames, frameToStart, currentFrame, rate, saveNums, filename, size)
                         frames = []  # 清空列表缓存，进行下一次截取
                     else:
                         saveFlag = save_video_with_ffmpeg(filename, frameToStart, currentFrame, rate, saveNums, mode,
@@ -443,11 +461,13 @@ def cut_video(filename, mode=3, boundary=19):
                         saveNums += 1
                         frameToStart = currentFrame
                     else:
-                        print('第' + str(saveNums) + '段视频保存失败')
-                        break
+                        print('第' + str(saveNums) + '段视频保存失败, 原因见上')
+                        saveNums += 1
+                        continue
+                        # break
                 else:
                     print('小于1秒的剪辑')
-        write_log_to_excel(name)  # 剪裁结束，存入表格
+        # write_log_to_excel(name)  # 剪裁结束，存入表格
         capture.release()
 
         """
@@ -457,6 +477,7 @@ def cut_video(filename, mode=3, boundary=19):
             os.remove(filename)
         elif mode == 3:
             import shutil
+            # 先不要删除middle_file, 让我先分析分析
             shutil.rmtree(os.path.join(middle_file_path, name))
 
     else:
@@ -464,7 +485,7 @@ def cut_video(filename, mode=3, boundary=19):
     return os.path.join(os.getcwd(), "cut", name)
 
 
-def read_dir_video(path, mode=3, num=9999, generate_color=False):
+def read_dir_video(path, mode=3, num=2, generate_color=False):
     """
     如果要批量切割视频，应调用此方法
     :param path: 路径名
