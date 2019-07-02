@@ -485,7 +485,7 @@ def cut_video(filename, mode=3, boundary=19):
     return os.path.join(os.getcwd(), "cut", name)
 
 
-def read_dir_video(path, mode=3, num=2, generate_color=False):
+def read_dir_video(path, mode=3, num=31, generate_color=False):
     """
     如果要批量切割视频，应调用此方法
     :param path: 路径名
