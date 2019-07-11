@@ -34,6 +34,9 @@ save_audio_path = os.path.join(os.getcwd(), "host_video", "audio")
 # 存放截取视频开头图片的预处理文件
 tmp_first_frame_path = os.path.join(os.getcwd(), "tmp_middle")
 
+if not os.path.exists(tmp_first_frame_path):
+    os.mkdir(tmp_first_frame_path)
+
 # 未用到的全局变量
 cut_file_path = os.path.join(os.getcwd(), "cut")
 ffmpegName = ""
@@ -150,7 +153,7 @@ def save_video(frames, frameToStart, frameToStop, rate, saveNums, filename, size
     writer.open(os.path.join(filepath, filename), int(1145656920), rate, size, True)  # 参数2为avi格式的forucc，使用别的格式会导致转换出错
     print(filename, '片段帧大小', str(len(frames)))
     if len(frames) < 140:
-        print('★★★★★★' + 'frames.size过小' + '★★★★★★')
+        print('================' + 'frames.size过小' + '================')
         return False
     for frame in frames:
         writer.write(frame)
@@ -164,7 +167,7 @@ def save_video(frames, frameToStart, frameToStop, rate, saveNums, filename, size
     # 若识别不到人脸直接pass
     res = is_face(tmp_path)
     if res is None:
-        print('★★★★★★' + '未识别到人脸' + '★★★★★★')
+        print('================' + '未识别到人脸' + '================')
         return False
 
     for i_path in res:
@@ -176,9 +179,8 @@ def save_video(frames, frameToStart, frameToStop, rate, saveNums, filename, size
             break
 
     if who is None:
-        print('★★★★★★' + '人脸库中不存在该脸' + '★★★★★★')
+        print('================' + '人脸库中不存在该脸' + '================')
         return False
-
 
     # 调用自己的接口，把数据保存指定路径
     framesPath = os.path.join(save_frames_path, who, filename.split('》')[-1].split('.')[0])
@@ -186,7 +188,6 @@ def save_video(frames, frameToStart, frameToStop, rate, saveNums, filename, size
     if not os.path.exists(framesPath):
         os.makedirs(framesPath)
     get_image(os.path.join(filepath, filename), framesPath)
-
 
     # 使用ffmpeg剪切对应时间段的音频
     subprocess.call([os.path.join(os.getcwd(), ffmpegName), "-y", "-vn", "-ss", str(frameToStart / rate), "-t",
@@ -199,8 +200,8 @@ def save_video(frames, frameToStart, frameToStop, rate, saveNums, filename, size
         os.mkdir(savePath)
 
     audioPath = os.path.join(save_audio_path, who)
-    if not os.path.exists(framesPath):
-        os.makedirs(framesPath)
+    if not os.path.exists(audioPath):
+        os.makedirs(audioPath)
     get_audio(os.path.join(filepath, filename) + ".mp3", os.path.join(audioPath, filename.split('》')[-1].split('.')[0]))
 
     print('该片段符合要求，已保存')
@@ -307,6 +308,7 @@ def merge_video(filenames):
         if not os.path.exists(os.getcwd() + "\\middle_file\\merge"):
             os.mkdir(os.getcwd() + "\\middle_file\\merge")
         print(filename)
+
         name = filename.split('\\')[len(filename.split('\\')) - 1]
         all_name += os.path.splitext(name)[0] + '_'
         name = os.path.splitext(name)[0]
@@ -479,13 +481,13 @@ def cut_video(filename, mode=3, boundary=19):
             import shutil
             # 先不要删除middle_file, 让我先分析分析
             shutil.rmtree(os.path.join(middle_file_path, name))
-
+            # shutil.rmtree(tmp_first_frame_path)
     else:
         print('打开视频失败')
     return os.path.join(os.getcwd(), "cut", name)
 
 
-def read_dir_video(path, mode=3, num=31, generate_color=False):
+def read_dir_video(path, mode=3, num=9999, generate_color=False):
     """
     如果要批量切割视频，应调用此方法
     :param path: 路径名
@@ -507,12 +509,33 @@ def read_dir_video(path, mode=3, num=31, generate_color=False):
             print(file)
             cut_path = cut_video(filename=file, mode=mode)
             generate_video_info(cut_path, generate_color)
+
+        import shutil
+        shutil.rmtree(tmp_first_frame_path)
+        tmp_cut_image = os.path.join(os.getcwd(), "tmp_cut_image")
+        if os.path.exists(tmp_cut_image):
+            shutil.rmtree(tmp_cut_image)
+        if not os.path.exists(tmp_first_frame_path):
+            os.mkdir(tmp_first_frame_path)
+        if not os.path.exists(tmp_cut_image):
+            os.mkdir(tmp_cut_image)
+
         count += 1
 
 
 def read_video(filename, mode=3, generate_color=False):
     cut_path = cut_video(filename, mode)
     generate_video_info(cut_path, generate_color)
+
+    import shutil
+    shutil.rmtree(tmp_first_frame_path)
+    tmp_cut_image = os.path.join(os.getcwd(), "tmp_cut_image")
+    if os.path.exists(tmp_cut_image):
+        shutil.rmtree(tmp_cut_image)
+    if not os.path.exists(tmp_first_frame_path):
+        os.mkdir(tmp_first_frame_path)
+    if not os.path.exists(tmp_cut_image):
+        os.mkdir(tmp_cut_image)
 
 
 def generate_video_info(cut_path, generate_color=False):

@@ -15,7 +15,7 @@ from FacenetSDK.facenet import get_model_filenames
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = '2'  # 只显示 warning 和 Error
 
 MODELPATH = os.path.join(os.getcwd(), "FacenetSDK", "20180408-102900")
-classifier_pkl_path = os.path.join(os.getcwd(), "FacenetSDK", "host_video.pkl")
+classifier_pkl_path = os.path.join(os.getcwd(), "FacenetSDK", "host_video_20190711.pkl")
 
 minsize = 20  # minimum size of face
 threshold = [0.6, 0.7, 0.7]  # three steps's threshold
@@ -133,7 +133,7 @@ with tf.Graph().as_default():
         img = misc.imread(os.path.expanduser(image_path), mode='RGB')
         # 设置默认插入时 detect_multiple_faces =False只检测图中的一张人脸，True则检测人脸中的多张
         # 一般入库时只检测一张人脸，查询时检测多张人脸
-        res = _image_array_align_data(img, image_path, pnet, rnet, onet, detect_multiple_faces=True)
+        res = _image_array_align_data(img, image_path, pnet, rnet, onet, detect_multiple_faces=False)
 
         return res
 
