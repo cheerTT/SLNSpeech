@@ -38,6 +38,7 @@ import align.detect_face
 import random
 from time import sleep
 
+
 def main(args):
     sleep(random.random())
     output_dir = os.path.expanduser(args.output_dir)

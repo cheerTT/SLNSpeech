@@ -13,8 +13,9 @@ from FacenetSDK.align.detect_face import create_mtcnn, detect_face
 from FacenetSDK.facenet import get_model_filenames
 
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = '2'  # 只显示 warning 和 Error
-MODELPATH = r'E:\codes\pycharm\pycharm_paper\automated-cutting-video-tool\FacenetSDK\20180408-102900'
-classifier_pkl_path = r'E:\codes\pycharm\pycharm_paper\automated-cutting-video-tool\FacenetSDK\host_video.pkl'
+
+MODELPATH = os.path.join(os.getcwd(), "FacenetSDK", "20180408-102900")
+classifier_pkl_path = os.path.join(os.getcwd(), "FacenetSDK", "host_video_20190711.pkl")
 
 minsize = 20  # minimum size of face
 threshold = [0.6, 0.7, 0.7]  # three steps's threshold
@@ -25,6 +26,7 @@ with tf.Graph().as_default():
     gpu_memory_fraction = 0.25
     gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=gpu_memory_fraction)
     sess = tf.Session(config=tf.ConfigProto(gpu_options=gpu_options, log_device_placement=False))
+    # sess = tf.Session()
     with sess.as_default():
         pnet, rnet, onet = create_mtcnn(sess, None)
 
@@ -98,7 +100,7 @@ with tf.Graph().as_default():
                 nrof_successfully_aligned += 1
 
                 # 保存检测的头像
-                filename_base = r'E:\codes\pycharm\pycharm_paper\automated-cutting-video-tool\tmp_cut_image'
+                filename_base = os.path.join(os.getcwd(), "tmp_cut_image")
 
                 if not os.path.exists(filename_base):
                     os.mkdir(filename_base)
@@ -131,7 +133,7 @@ with tf.Graph().as_default():
         img = misc.imread(os.path.expanduser(image_path), mode='RGB')
         # 设置默认插入时 detect_multiple_faces =False只检测图中的一张人脸，True则检测人脸中的多张
         # 一般入库时只检测一张人脸，查询时检测多张人脸
-        res = _image_array_align_data(img, image_path, pnet, rnet, onet, detect_multiple_faces=True)
+        res = _image_array_align_data(img, image_path, pnet, rnet, onet, detect_multiple_faces=False)
 
         return res
 

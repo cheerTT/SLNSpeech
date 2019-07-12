@@ -35,7 +35,7 @@ def get_audio(video_path, audio_path):
     :return:
     """
     try:
-        os.system('ffmpeg -i {0} -ac 1 -ar 11025 {1}.wav'.format(video_path, audio_path))
+        os.system('ffmpeg -i {0} -ac 1 -ar 11025 {1}.mp3'.format(video_path, audio_path))
     except:
         print('=======================================================')
         print(video_path)
@@ -58,21 +58,25 @@ def get_first_image(video_path, image_name):
 
 
 if __name__ == '__main__':
-    with open(jsonname, 'r') as load_f:
-        load_dict = json.load(load_f)
-        tmp = load_dict['videos']
-        for r in res:
-            lis = tmp.get(res[0])  # 获取某一个主持人的视频列表
-            print('start......')
-            for li in lis:
-                # 判断当前路径是否存在，没有则创建new文件
-                folder_path = 'host_video/frames/' +filename + '/' + li
-                if not os.path.exists(folder_path):
-                    os.makedirs(folder_path)
+    # with open(jsonname, 'r') as load_f:
+    #     load_dict = json.load(load_f)
+    #     tmp = load_dict['videos']
+    #     for r in res:
+    #         lis = tmp.get(res[0])  # 获取某一个主持人的视频列表
+    #         print('start......')
+    #         for li in lis:
+    #             # 判断当前路径是否存在，没有则创建new文件
+    #             folder_path = 'host_video/frames/' +filename + '/' + li
+    #             if not os.path.exists(folder_path):
+    #                 os.makedirs(folder_path)
+    #
+    #             # 处理操作，获取图片
+    #             video_path = 'host_video_raw/' + filename + '.mp4'
+    #             image_path = folder_path
+    #             get_image(video_path, image_path)
+    #
+    # print('success!')
 
-                # 处理操作，获取图片
-                video_path = 'host_video_raw/' + filename + '.mp4'
-                image_path = folder_path
-                get_image(video_path, image_path)
-
-    print('success!')
+    video_path = r'E:\CNTV\Download\《共同关注》20140122\《共同关注》20140122.mp4'
+    image_path = r'F:\datasets\host_video\20190711\1'
+    get_image(video_path, image_path)
