@@ -411,6 +411,9 @@ def cut_video(filename, mode=3, boundary=19):
             if mode == 3:
                 frames.append(frame)  # 只有在mode=3时才进行frame存储，节省时间、空间
             currentImg = frame
+            if len(frames) > 3600:
+                frames = []
+                continue
             success, frame = capture.read()
             if not success:
                 if currentFrame < totalFrameNumber:
