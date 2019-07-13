@@ -54,7 +54,7 @@ def get_first_image(video_path, image_name):
     :return:
     """
     try:
-        os.system('ffmpeg -ss 00:00:02 -t 1 -i {0} -r 1 {1}'.format(video_path, image_name))
+        os.system('ffmpeg -ss 00:00:01 -t 1 -i {0} -r 1 {1}'.format(video_path, image_name))
     except:
         print('=======================================================')
         print(video_path)

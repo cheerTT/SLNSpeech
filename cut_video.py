@@ -188,7 +188,7 @@ def save_video(frames, frameToStart, frameToStop, rate, saveNums, filename, size
 
     tmp_last = os.path.join(tmp_last_frame_path, tmp_filename)
 
-    if len(frames) % rate < 5:
+    if len(frames) % rate < 10:
         ss = len(frames) / rate - 2
     else:
         ss = len(frames) / rate - 1
@@ -498,12 +498,7 @@ def cut_video(filename, mode=3, boundary=19):
             # shutil.rmtree(tmp_first_frame_path)
     else:
         print('打开视频失败')
-    if not os.path.exists(os.path.join(os.getcwd(), "cut", name)):
-        with open('log.txt', 'a') as f:
-            f.write(name)
-            f.write('\n')
-        os.mkdir(os.path.join(os.getcwd(), "cut", name))
-    return os.path.join(os.path.join(os.getcwd(), "cut", name))
+    return os.path.join(os.getcwd(), "cut", name)
 
 
 def read_dir_video(path, mode=3, num=9999, generate_color=False):
