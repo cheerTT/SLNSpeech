@@ -429,31 +429,6 @@ def cut_video(filename, mode=3, boundary=19):
                     print('--------------------------我是分割线---------------------------')
                     print('开始判断该片段是否符合剪辑要求')
                     if mode == 3:
-                        #################################################
-                        # 在保存视频之前需要设定是否保存
-                        #################################################
-
-                        # 当前图片若与人脸库匹配，则把frames中所有的图片存入指定文件夹，
-                        # 并把对应的音频文件存入指定文件夹，任务完成。
-                        # img = Image.fromarray(currentImg, 'RGB')
-                        # # img.save('')
-                        # print(len(frames))
-                        # print(filename.split('》')[-1])
-                        # savePath = os.path.join(save_frames_path, filename.split('》')[-1].split('.')[0] + '_' + str(saveNums))
-                        #
-                        # if not os.path.exists(savePath):
-                        #     os.mkdir(savePath)
-                        #
-                        # for index, fra in enumerate(frames):
-                        #     tmp_frame = Image.fromarray(fra, 'RGB')
-                        #     tmp_frame.save(os.path.join(savePath, '%06d' % (index + 1) + '.jpg'))
-
-                        # 保存图片
-                        # img = Image.fromarray(currentImg, 'RGB')
-                        # tmp_filename = filename.split('》')[-1].split('.')[0] + '_' + str(saveNums) + '.jpg'
-                        # tmp_path = os.path.join(tmp_first_frame_path, tmp_filename)
-                        # img.save(tmp_path)
-
                         # 保存当前图片，获取路径进行相关判断
                         saveFlag = save_video(frames, frameToStart, currentFrame, rate, saveNums, filename, size)
                         frames = []  # 清空列表缓存，进行下一次截取
@@ -468,6 +443,7 @@ def cut_video(filename, mode=3, boundary=19):
                     else:
                         print('第' + str(saveNums) + '段视频保存失败, 原因见上')
                         saveNums += 1
+                        frameToStart = currentFrame
                         continue
                         # break
                 else:
