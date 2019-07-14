@@ -131,7 +131,8 @@ if __name__ == '__main__':
 
     # get_last_image(video_path, 'e.jpg')
 
-    video = r'E:\codes\git\automated-cutting-video-tool\middle_file\《共同关注》20190101\《共同关注》20190101_35.avi'
     # a = get_video_time(video)
     # print(a)
 
+    video = r'E:\codes\git\automated-cutting-video-tool\middle_file\《共同关注》20190106\《共同关注》20190106_71.avi'
+    get_last_image(151 / 25 - 1, video, 'b.jpg')

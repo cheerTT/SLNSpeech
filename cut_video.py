@@ -188,7 +188,11 @@ def save_video(frames, frameToStart, frameToStop, rate, saveNums, filename, size
 
     tmp_last = os.path.join(tmp_last_frame_path, tmp_filename)
 
-    get_last_image(len(frames) / rate - 2, os.path.join(filepath, filename), tmp_last)
+    if len(frames) % rate < 5:
+        ss = len(frames) / rate - 2
+    else:
+        ss = len(frames) / rate - 1
+    get_last_image(ss, os.path.join(filepath, filename), tmp_last)
 
     # 对后半段视频进行处理的接口,若识别不到人脸直接pass
     res1 = is_face(tmp_last)
@@ -494,7 +498,12 @@ def cut_video(filename, mode=3, boundary=19):
             # shutil.rmtree(tmp_first_frame_path)
     else:
         print('打开视频失败')
-    return os.path.join(os.getcwd(), "cut", name)
+    if not os.path.exists(os.path.join(os.getcwd(), "cut", name)):
+        with open('log.txt', 'a') as f:
+            f.write(name)
+            f.write('\n')
+        os.mkdir(os.path.join(os.getcwd(), "cut", name))
+    return os.path.join(os.path.join(os.getcwd(), "cut", name))
 
 
 def read_dir_video(path, mode=3, num=9999, generate_color=False):
