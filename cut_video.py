@@ -8,7 +8,7 @@ import collections
 import generate_color as gc
 import platform
 from PIL import Image
-from util.video2frame import get_image, get_first_image, get_audio
+from util.video2frame import get_image, get_first_image, get_last_image, get_audio
 from util.face_detect_facenet import is_face, who_host
 
 
@@ -33,9 +33,12 @@ save_frames_path = os.path.join(os.getcwd(), "host_video", "frames")
 save_audio_path = os.path.join(os.getcwd(), "host_video", "audio")
 # 存放截取视频开头图片的预处理文件
 tmp_first_frame_path = os.path.join(os.getcwd(), "tmp_middle")
+tmp_last_frame_path = os.path.join(os.getcwd(), "tmp_last")
 
 if not os.path.exists(tmp_first_frame_path):
     os.mkdir(tmp_first_frame_path)
+if not os.path.exists(tmp_last_frame_path):
+    os.mkdir(tmp_last_frame_path)
 
 # 未用到的全局变量
 cut_file_path = os.path.join(os.getcwd(), "cut")
@@ -170,6 +173,7 @@ def save_video(frames, frameToStart, frameToStop, rate, saveNums, filename, size
         print('================' + '未识别到人脸' + '================')
         return False
 
+    who = ''
     for i_path in res:
         # 识别到人脸，看人脸是谁的
         who = who_host(i_path)
@@ -180,6 +184,33 @@ def save_video(frames, frameToStart, frameToStop, rate, saveNums, filename, size
 
     if who is None:
         print('================' + '人脸库中不存在该脸' + '================')
+        return False
+
+    tmp_last = os.path.join(tmp_last_frame_path, tmp_filename)
+
+    get_last_image(len(frames) / rate - 2, os.path.join(filepath, filename), tmp_last)
+
+    # 对后半段视频进行处理的接口,若识别不到人脸直接pass
+    res1 = is_face(tmp_last)
+    if res1 is None:
+        print('================' + '后半段视频未识别到人脸' + '================')
+        return False
+
+    who1 = ''
+    for i_path in res1:
+        # 识别到人脸，看人脸是谁的
+        who1 = who_host(i_path)
+
+        # 不符合人脸的情况
+        if who1 is not None:
+            break
+
+    if who1 is None:
+        print('================' + '后半段视频，人脸库中不存在该脸' + '================')
+        return False
+
+    if who != who1:
+        print('================' + '后半段视频与前半段人脸不匹配' + '================')
         return False
 
     # 调用自己的接口，把数据保存指定路径
@@ -491,11 +522,14 @@ def read_dir_video(path, mode=3, num=9999, generate_color=False):
 
         import shutil
         shutil.rmtree(tmp_first_frame_path)
+        shutil.rmtree(tmp_last_frame_path)
         tmp_cut_image = os.path.join(os.getcwd(), "tmp_cut_image")
         if os.path.exists(tmp_cut_image):
             shutil.rmtree(tmp_cut_image)
         if not os.path.exists(tmp_first_frame_path):
             os.mkdir(tmp_first_frame_path)
+        if not os.path.exists(tmp_last_frame_path):
+            os.mkdir(tmp_last_frame_path)
         if not os.path.exists(tmp_cut_image):
             os.mkdir(tmp_cut_image)
 
@@ -508,11 +542,14 @@ def read_video(filename, mode=3, generate_color=False):
 
     import shutil
     shutil.rmtree(tmp_first_frame_path)
+    shutil.rmtree(tmp_last_frame_path)
     tmp_cut_image = os.path.join(os.getcwd(), "tmp_cut_image")
     if os.path.exists(tmp_cut_image):
         shutil.rmtree(tmp_cut_image)
     if not os.path.exists(tmp_first_frame_path):
         os.mkdir(tmp_first_frame_path)
+    if not os.path.exists(tmp_last_frame_path):
+        os.mkdir(tmp_last_frame_path)
     if not os.path.exists(tmp_cut_image):
         os.mkdir(tmp_cut_image)
 
