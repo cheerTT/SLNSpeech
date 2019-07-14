@@ -498,6 +498,11 @@ def cut_video(filename, mode=3, boundary=19):
             # shutil.rmtree(tmp_first_frame_path)
     else:
         print('打开视频失败')
+    if not os.path.exists(os.path.join(os.getcwd(), "cut", name)):
+        with open('log.txt', 'a') as f:
+            f.write(name)
+            f.write('\n')
+        os.mkdir(os.path.join(os.getcwd(), "cut", name))
     return os.path.join(os.getcwd(), "cut", name)
 
 
