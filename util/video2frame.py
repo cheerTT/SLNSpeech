@@ -4,6 +4,10 @@
 
 import os
 import json
+import cv2
+import subprocess
+import platform
+
 
 # 如：'zhuguangquan', 'guguoning', 'baoxiaofeng', 'hejia'
 filename = '文件名-每次需要手动编辑'
@@ -57,6 +61,31 @@ def get_first_image(video_path, image_name):
         print('while handling image, something seems to have an error!')
 
 
+def get_last_image(ss, video_path, image_name):
+    """
+    获取单张图片,从后往前
+    :param video_path: 原始视频路径
+    :param image_path: 处理后图像的存放路径
+    :return:
+    """
+    ss = sec2hoursecondsec(ss)
+    try:
+        os.system('ffmpeg -ss {0} -t 1 -i {1} -r 1 -frames:v 1 {2}'.format(ss, video_path, image_name))
+        # os.system('ffmpeg -ss {0} -t 1 -i {1} -vcodec copy -frames:v 1 {2}'.format(ss, video_path, image_name))
+    except:
+        print('=======================================================')
+        print(video_path)
+        print('while handling image, something seems to have an error!')
+
+
+def sec2hoursecondsec(sec):
+    sec = int(float(sec))
+    h = "%02d" % int(sec / 3600)
+    m = "%02d" % int(sec % 3600 / 60)
+    s = "%02d" % int(sec % 60)
+    return str(h) + ':' + str(m) + ':' + str(s)
+
+
 if __name__ == '__main__':
     # with open(jsonname, 'r') as load_f:
     #     load_dict = json.load(load_f)
@@ -77,6 +106,32 @@ if __name__ == '__main__':
     #
     # print('success!')
 
-    video_path = r'E:\CNTV\Download\《共同关注》20140122\《共同关注》20140122.mp4'
-    image_path = r'F:\datasets\host_video\20190711\1'
-    get_image(video_path, image_path)
+    # video_path = r'E:\CNTV\Download\《共同关注》20140122\《共同关注》20140122.mp4'
+    # image_path = r'F:\datasets\host_video\20190711\1'
+    # get_image(video_path, image_path)
+
+    # video_path = r'E:\codes\git\automated-cutting-video-tool\middle_file\《共同关注》20180101\《共同关注》20180101_10.avi'
+    # video_path = r'E:\CNTV\Download\共同关注\《共同关注》20180101.mp4'
+    # res = get_video_time(video_path)
+    # print(sec2hoursecondsec(res))
+
+    # video_path = r'E:\CNTV\Download\共同关注\《共同关注》20180101.mp4'
+    # video_path = r'E:\codes\git\automated-cutting-video-tool\middle_file\《共同关注》20180101\《共同关注》20180101_0.avi'
+    # image_name = 'a.jpg'
+    # get_last_image(video_path, image_name)
+
+
+    # video_path = r'E:\codes\git\automated-cutting-video-tool\middle_file\《共同关注》20180101\《共同关注》20180101_0.avi'
+    # clip = VideoFileClip(video_path)
+    # print(clip.duration)
+
+    # video_path = r'F:\cntv\201901\《共同关注》20190105.mp4'
+    # res = get_video_time(video_path)
+    # print(res)
+
+    # get_last_image(video_path, 'e.jpg')
+
+    video = r'E:\codes\git\automated-cutting-video-tool\middle_file\《共同关注》20190101\《共同关注》20190101_35.avi'
+    # a = get_video_time(video)
+    # print(a)
+
