@@ -7,7 +7,7 @@ html5lib==0.9999999
 joblib==0.13.2
 Markdown==3.1.1
 numpy==1.16.4
-opencv-python==3.4.3.18
+opencv-python==4.2.0.32
 pandas==0.24.1
 Pillow==5.4.1
 protobuf==3.6.0
