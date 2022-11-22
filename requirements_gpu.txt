@@ -105,7 +105,7 @@ pbr==5.1.2
 pescador==1.1.0
 pexpect==4.6.0
 pickleshare==0.7.5
-Pillow==5.4.1
+Pillow==9.3.0
 plotnine==0.5.1
 prettytable==0.7.2
 progressbar2==3.34.3
